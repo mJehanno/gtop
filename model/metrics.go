@@ -6,6 +6,7 @@ import (
 )
 
 type MetricModel struct {
+	Uptime   int64
 	FreeRam  uint64
 	TotalRam uint64
 }
@@ -19,6 +20,7 @@ func New() *MetricModel {
 	}
 	m := new(MetricModel)
 
+	m.Uptime = sysInf.Uptime
 	m.TotalRam = sysInf.Totalram
 	m.FreeRam = sysInf.Freeram
 

@@ -44,7 +44,8 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (a *AppModel) View() string {
-	s := "Memory usage : "
+	s := "Uptime : " + humanize.Time(time.Now().Add(-time.Duration(a.metrics.Uptime)*time.Second)) + "\n"
+	s += "Memory usage : "
 	s += a.ramProgress.View() + "   "
 	s += humanize.Bytes(a.metrics.FreeRam) + "/" + humanize.Bytes(a.metrics.TotalRam)
 	return s
