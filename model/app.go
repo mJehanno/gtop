@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/dustin/go-humanize"
 	"github.com/mjehanno/gtop/model/metrics"
+	"github.com/mjehanno/gtop/model/network"
 )
 
 type AppModel struct {
@@ -16,6 +17,7 @@ type AppModel struct {
 	metrics      *metrics.MetricModel
 	ramProgress  progress.Model
 	swapProgress progress.Model
+	interfaces   []network.Interface
 }
 
 func InitialModel() *AppModel {
@@ -25,6 +27,7 @@ func InitialModel() *AppModel {
 		metrics:      metrics.New(),
 		ramProgress:  progress.New(progress.WithDefaultGradient()),
 		swapProgress: progress.New(progress.WithDefaultGradient()),
+		interfaces:   network.GetInterfaces(),
 	}
 }
 
@@ -70,11 +73,21 @@ func (a *AppModel) View() string {
 		group, _ := user.LookupGroupId(id)
 		s += group.Name
 		if i != len(groupIds)-1 {
-			s += ","
+			s += ", "
+		} else {
+			s += "\n"
 		}
 	}
-	s += "\n"
-	s += "Uptime : " + humanize.Time(time.Now().Add(-time.Duration(a.metrics.Uptime)*time.Second)) + "\n"
+	s += "Uptime : " + humanize.Time(time.Now().Add(-time.Duration(a.metrics.Uptime)*time.Second)) + "   "
+	s += "Network : "
+	for i, in := range a.interfaces {
+		s += in.Name + " => " + in.IpAddress
+		if i != len(a.interfaces)-1 {
+			s += ", "
+		} else {
+			s += "\n"
+		}
+	}
 	s += "Memory usage : "
 	s += a.ramProgress.View() + "   "
 	s += humanize.Bytes(usedRam) + "/" + humanize.Bytes(a.metrics.TotalRam) + "\n"
