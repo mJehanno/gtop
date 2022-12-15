@@ -1,6 +1,7 @@
 package model
 
 import (
+	"os"
 	"os/user"
 	"time"
 
@@ -63,7 +64,8 @@ func (a *AppModel) View() string {
 	usedRam := a.metrics.TotalRam - a.metrics.BufferedRam - a.metrics.FreeRam
 	usedSwap := a.metrics.TotalSwap - a.metrics.FreeSwap
 	groupIds, _ := a.user.GroupIds()
-	s := "Current user : " + a.user.Uid + " " + a.user.Username + "   Groups : "
+	hostname, _ := os.Hostname()
+	s := "Current user : " + a.user.Uid + " " + a.user.Username + "@" + hostname + "   Groups : "
 	for i, id := range groupIds {
 		group, _ := user.LookupGroupId(id)
 		s += group.Name
