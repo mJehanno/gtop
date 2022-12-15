@@ -6,11 +6,12 @@ import (
 )
 
 type MetricModel struct {
-	Uptime    int64
-	FreeRam   uint64
-	TotalRam  uint64
-	TotalSwap uint64
-	FreeSwap  uint64
+	Uptime      int64
+	FreeRam     uint64
+	BufferedRam uint64
+	TotalRam    uint64
+	TotalSwap   uint64
+	FreeSwap    uint64
 }
 
 func New() *MetricModel {
@@ -27,6 +28,7 @@ func New() *MetricModel {
 	m.FreeRam = sysInf.Freeram
 	m.TotalSwap = sysInf.Totalswap
 	m.FreeSwap = sysInf.Freeswap
+	m.BufferedRam = sysInf.Bufferram
 
 	return m
 }

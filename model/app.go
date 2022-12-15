@@ -55,7 +55,7 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (a *AppModel) View() string {
-	usedRam := a.metrics.TotalRam - a.metrics.FreeRam
+	usedRam := a.metrics.TotalRam - a.metrics.BufferedRam - a.metrics.FreeRam
 	usedSwap := a.metrics.TotalSwap - a.metrics.FreeSwap
 	s := "Uptime : " + humanize.Time(time.Now().Add(-time.Duration(a.metrics.Uptime)*time.Second)) + "\n"
 	s += "Memory usage : "
@@ -66,14 +66,14 @@ func (a *AppModel) View() string {
 	return s
 }
 
-func updateProgressBar(free, total uint64, bar *progress.Model) tea.Cmd {
-	used := total - free
+func updateProgressBar(free, buffered, total uint64, bar *progress.Model) tea.Cmd {
+	used := total - buffered - free
 	return bar.SetPercent(float64(used) / float64(total))
 
 }
 
 func (a *AppModel) updateProgressesBars() tea.Cmd {
-	return tea.Batch(updateProgressBar(a.metrics.FreeRam, a.metrics.TotalRam, &a.ramProgress), updateProgressBar(a.metrics.FreeSwap, a.metrics.TotalSwap, &a.swapProgress))
+	return tea.Batch(updateProgressBar(a.metrics.FreeRam, a.metrics.BufferedRam, a.metrics.TotalRam, &a.ramProgress), updateProgressBar(a.metrics.FreeSwap, 0, a.metrics.TotalSwap, &a.swapProgress))
 }
 
 type tickMsg time.Time
