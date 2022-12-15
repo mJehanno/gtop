@@ -1,22 +1,27 @@
 package model
 
 import (
+	"os/user"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/dustin/go-humanize"
+	"github.com/mjehanno/gtop/model/metrics"
 )
 
 type AppModel struct {
-	metrics      *MetricModel
+	user         *user.User
+	metrics      *metrics.MetricModel
 	ramProgress  progress.Model
 	swapProgress progress.Model
 }
 
 func InitialModel() *AppModel {
+	user, _ := user.Current()
 	return &AppModel{
-		metrics:      New(),
+		user:         user,
+		metrics:      metrics.New(),
 		ramProgress:  progress.New(progress.WithDefaultGradient()),
 		swapProgress: progress.New(progress.WithDefaultGradient()),
 	}
@@ -34,7 +39,7 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return a, tea.Quit
 		}
 	case tickMsg:
-		a.metrics = New()
+		a.metrics = metrics.New()
 		return a, tea.Batch(a.updateProgressesBars(), tickCommand(time.Second))
 	case progress.FrameMsg:
 		cmds := []tea.Cmd{}
@@ -57,7 +62,17 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (a *AppModel) View() string {
 	usedRam := a.metrics.TotalRam - a.metrics.BufferedRam - a.metrics.FreeRam
 	usedSwap := a.metrics.TotalSwap - a.metrics.FreeSwap
-	s := "Uptime : " + humanize.Time(time.Now().Add(-time.Duration(a.metrics.Uptime)*time.Second)) + "\n"
+	groupIds, _ := a.user.GroupIds()
+	s := "Current user : " + a.user.Uid + " " + a.user.Username + "   Groups : "
+	for i, id := range groupIds {
+		group, _ := user.LookupGroupId(id)
+		s += group.Name
+		if i != len(groupIds)-1 {
+			s += ","
+		}
+	}
+	s += "\n"
+	s += "Uptime : " + humanize.Time(time.Now().Add(-time.Duration(a.metrics.Uptime)*time.Second)) + "\n"
 	s += "Memory usage : "
 	s += a.ramProgress.View() + "   "
 	s += humanize.Bytes(usedRam) + "/" + humanize.Bytes(a.metrics.TotalRam) + "\n"
