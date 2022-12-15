@@ -9,19 +9,21 @@ import (
 )
 
 type AppModel struct {
-	metrics     *MetricModel
-	ramProgress progress.Model
+	metrics      *MetricModel
+	ramProgress  progress.Model
+	swapProgress progress.Model
 }
 
 func InitialModel() *AppModel {
 	return &AppModel{
-		metrics:     New(),
-		ramProgress: progress.New(progress.WithDefaultGradient()),
+		metrics:      New(),
+		ramProgress:  progress.New(progress.WithDefaultGradient()),
+		swapProgress: progress.New(progress.WithDefaultGradient()),
 	}
 }
 
 func (a *AppModel) Init() tea.Cmd {
-	return tea.Batch(tickCommand(time.Second), a.updateRamProgress())
+	return tea.Batch(tickCommand(time.Second), a.updateProgressesBars())
 }
 
 func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -33,26 +35,45 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tickMsg:
 		a.metrics = New()
-		return a, tea.Batch(a.updateRamProgress(), tickCommand(time.Second))
+		return a, tea.Batch(a.updateProgressesBars(), tickCommand(time.Second))
 	case progress.FrameMsg:
-		progressModel, cmd := a.ramProgress.Update(msg)
-		a.ramProgress = progressModel.(progress.Model)
-		return a, cmd
+		cmds := []tea.Cmd{}
+		progressRamModel, cmdRam := a.ramProgress.Update(msg)
+		a.ramProgress = progressRamModel.(progress.Model)
+
+		cmds = append(cmds, cmdRam)
+
+		progressSwapModel, cmdSwap := a.swapProgress.Update(msg)
+		a.swapProgress = progressSwapModel.(progress.Model)
+
+		cmds = append(cmds, cmdSwap)
+
+		return a, tea.Batch(cmds...)
 
 	}
 	return a, nil
 }
 
 func (a *AppModel) View() string {
+	usedRam := a.metrics.TotalRam - a.metrics.FreeRam
+	usedSwap := a.metrics.TotalSwap - a.metrics.FreeSwap
 	s := "Uptime : " + humanize.Time(time.Now().Add(-time.Duration(a.metrics.Uptime)*time.Second)) + "\n"
 	s += "Memory usage : "
 	s += a.ramProgress.View() + "   "
-	s += humanize.Bytes(a.metrics.FreeRam) + "/" + humanize.Bytes(a.metrics.TotalRam)
+	s += humanize.Bytes(usedRam) + "/" + humanize.Bytes(a.metrics.TotalRam) + "\n"
+	s += "Swap usage : " + a.swapProgress.View() + "   " + humanize.Bytes(usedSwap) + "/" + humanize.Bytes(a.metrics.TotalSwap)
+
 	return s
 }
 
-func (a *AppModel) updateRamProgress() tea.Cmd {
-	return a.ramProgress.SetPercent(float64(a.metrics.FreeRam) / float64(a.metrics.TotalRam))
+func updateProgressBar(free, total uint64, bar *progress.Model) tea.Cmd {
+	used := total - free
+	return bar.SetPercent(float64(used) / float64(total))
+
+}
+
+func (a *AppModel) updateProgressesBars() tea.Cmd {
+	return tea.Batch(updateProgressBar(a.metrics.FreeRam, a.metrics.TotalRam, &a.ramProgress), updateProgressBar(a.metrics.FreeSwap, a.metrics.TotalSwap, &a.swapProgress))
 }
 
 type tickMsg time.Time
