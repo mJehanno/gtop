@@ -16,6 +16,7 @@ import (
 
 var labelStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF")).Underline(true).Render
 var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ab2727")).Render
+var titleStyle = lipgloss.NewStyle().Margin(1).Padding(0, 2).Align(lipgloss.Center).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("63")).Render
 
 type AppModel struct {
 	OS           os.Os
@@ -77,22 +78,25 @@ func (a *AppModel) View() string {
 
 	hostname, err := a.OS.Metrics.GetHostname()
 	if err != nil {
-		hostname = "- error while getting hostname"
+		hostname = errorStyle("- error while getting hostname")
 	}
 
 	var stringedUptime string
 
 	uptime, err := a.OS.Metrics.GetUptime()
 	if err != nil {
-		stringedUptime = "- error while getting uptime"
+		stringedUptime = errorStyle("- error while getting uptime")
 	} else {
 		stringedUptime = humanize.Time(time.Now().Add(-time.Second * time.Duration(uptime)))
 	}
 
-	s := ""
-	s += labelStyle("Current User:") + spaceSep + a.OS.Metrics.GetCurrentUser().Uid + spaceSep + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + tabSep + labelStyle("Groups:") + spaceSep + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ", ") + cr
+	userLine := labelStyle("Current User:") + spaceSep + a.OS.Metrics.GetCurrentUser().Uid + spaceSep + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + tabSep + labelStyle("Groups:") + spaceSep + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ", ") + cr
+	systemLine := labelStyle("Uptime:") + spaceSep + stringedUptime + tabSep + labelStyle("Network:") + spaceSep + strings.Join(netAddresses, ", ") + cr
 
-	s += labelStyle("Uptime:") + spaceSep + stringedUptime + tabSep + labelStyle("Network:") + spaceSep + strings.Join(netAddresses, ", ") + cr
+	textBlock := lipgloss.JoinVertical(0.3, userLine, systemLine)
+
+	s := lipgloss.PlaceHorizontal(120, lipgloss.Center, titleStyle("GTop")) + cr
+	s += lipgloss.PlaceHorizontal(240, lipgloss.Left, textBlock)
 
 	return s
 }
