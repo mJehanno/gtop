@@ -16,7 +16,7 @@ import (
 
 var labelStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF")).Underline(true).Render
 var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ab2727")).Render
-var titleStyle = lipgloss.NewStyle().Margin(1).Padding(0, 2).Align(lipgloss.Center).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("63")).Render
+var titleStyle = lipgloss.NewStyle().Margin(1).Padding(0, 2).Align(lipgloss.Center).Foreground(lipgloss.Color("228")).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("63")).Render
 
 type AppModel struct {
 	OS           os.Os
@@ -93,10 +93,15 @@ func (a *AppModel) View() string {
 	userLine := labelStyle("Current User:") + spaceSep + a.OS.Metrics.GetCurrentUser().Uid + spaceSep + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + tabSep + labelStyle("Groups:") + spaceSep + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ", ") + cr
 	systemLine := labelStyle("Uptime:") + spaceSep + stringedUptime + tabSep + labelStyle("Network:") + spaceSep + strings.Join(netAddresses, ", ") + cr
 
+	ramLine := labelStyle("Ram usage:") + tabSep + a.ramProgress.View() + spaceSep + humanize.Bytes(a.OS.Metrics.GetTotalRam()-a.OS.Metrics.GetAvailableRam()) + "/" + humanize.Bytes(a.OS.Metrics.GetTotalRam()) + tabSep + labelStyle("Swap usage:") + tabSep + a.swapProgress.View() + cr
+
 	textBlock := lipgloss.JoinVertical(0.3, userLine, systemLine)
+	ramBlock := lipgloss.JoinVertical(lipgloss.Left, ramLine)
+
+	i := lipgloss.JoinVertical(lipgloss.Left, textBlock, ramBlock)
 
 	s := lipgloss.PlaceHorizontal(120, lipgloss.Center, titleStyle("GTop")) + cr
-	s += lipgloss.PlaceHorizontal(240, lipgloss.Left, textBlock)
+	s += lipgloss.PlaceHorizontal(240, lipgloss.Left, i)
 
 	return s
 }
@@ -104,8 +109,9 @@ func (a *AppModel) View() string {
 func initOSData(a *AppModel) {
 	switch runtime.GOOS {
 	case "linux":
+		metrics, _ := linux.New()
 		a.OS = os.Os{
-			Metrics: &linux.LinuxMetric{},
+			Metrics: metrics,
 		}
 	case "windows":
 	case "darwin":
