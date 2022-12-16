@@ -60,8 +60,13 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (a *AppModel) View() string {
+	hostname, err := a.OS.Metrics.GetHostname()
+	if err != nil {
+		hostname = " - error while getting hostname"
+	}
+
 	s := ""
-	s += "Current User : " + a.OS.Metrics.GetCurrentUser().Uid + " " + a.OS.Metrics.GetCurrentUser().Username + "   " + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ",")
+	s += "Current User: " + a.OS.Metrics.GetCurrentUser().Uid + " " + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + "   Groups: " + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ",")
 	return s
 }
 
