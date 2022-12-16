@@ -1,10 +1,17 @@
 package network
 
-import "net"
+import (
+	"fmt"
+	"net"
+)
 
 type Interface struct {
 	Name      string
 	IpAddress string
+}
+
+func (i *Interface) String() string {
+	return fmt.Sprintf("%s: %s", i.Name, i.IpAddress)
 }
 
 func GetInterfaces() []Interface {

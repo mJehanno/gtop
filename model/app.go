@@ -7,10 +7,15 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/dustin/go-humanize"
 	"github.com/mjehanno/gtop/model/metrics/linux"
 	"github.com/mjehanno/gtop/model/metrics/os"
 	"github.com/mjehanno/gtop/model/network"
 )
+
+var labelStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF")).Underline(true).Render
+var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ab2727")).Render
 
 type AppModel struct {
 	OS           os.Os
@@ -60,13 +65,35 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (a *AppModel) View() string {
+	tabSep := "    "
+	spaceSep := " "
+	cr := "\n"
+
+	netAddresses := make([]string, len(a.interfaces))
+
+	for i, a := range a.interfaces {
+		netAddresses[i] = a.String()
+	}
+
 	hostname, err := a.OS.Metrics.GetHostname()
 	if err != nil {
-		hostname = " - error while getting hostname"
+		hostname = "- error while getting hostname"
+	}
+
+	var stringedUptime string
+
+	uptime, err := a.OS.Metrics.GetUptime()
+	if err != nil {
+		stringedUptime = "- error while getting uptime"
+	} else {
+		stringedUptime = humanize.Time(time.Now().Add(-time.Second * time.Duration(uptime)))
 	}
 
 	s := ""
-	s += "Current User: " + a.OS.Metrics.GetCurrentUser().Uid + " " + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + "   Groups: " + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ",")
+	s += labelStyle("Current User:") + spaceSep + a.OS.Metrics.GetCurrentUser().Uid + spaceSep + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + tabSep + labelStyle("Groups:") + spaceSep + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ", ") + cr
+
+	s += labelStyle("Uptime:") + spaceSep + stringedUptime + tabSep + labelStyle("Network:") + spaceSep + strings.Join(netAddresses, ", ") + cr
+
 	return s
 }
 
@@ -76,13 +103,15 @@ func initOSData(a *AppModel) {
 		a.OS = os.Os{
 			Metrics: &linux.LinuxMetric{},
 		}
+	case "windows":
+	case "darwin":
+	case "bsd":
 	}
 }
 
 func updateProgressBar(available, total uint64, bar *progress.Model) tea.Cmd {
 	used := total - available
 	return bar.SetPercent(float64(used) / float64(total))
-
 }
 
 func (a *AppModel) updateProgressesBars() tea.Cmd {

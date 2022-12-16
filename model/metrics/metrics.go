@@ -5,7 +5,7 @@ import "github.com/mjehanno/gtop/model/user"
 type Metric interface {
 	GetHostname() (string, error)
 	GetCurrentUser() *user.User
-	GetUptime() int64
+	GetUptime() (float64, error)
 	GetTotalRam() uint64
 	GetAvailableRam() uint64
 	GetTotalSwap() uint64

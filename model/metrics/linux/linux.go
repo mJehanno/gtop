@@ -1,7 +1,10 @@
 package linux
 
 import (
+	"io/ioutil"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/mjehanno/gtop/model/user"
 )
@@ -23,8 +26,19 @@ func (l *LinuxMetric) GetCurrentUser() *user.User {
 	return currentUser
 }
 
-func (l *LinuxMetric) GetUptime() int64 {
-	return 0
+func (l *LinuxMetric) GetUptime() (float64, error) {
+	buf, err := ioutil.ReadFile("/proc/uptime")
+	if err != nil {
+		return 0, err
+	}
+	fields := strings.Fields(string(buf))
+
+	uptime, err := strconv.ParseFloat(fields[0], 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return uptime, nil
 }
 
 func (l *LinuxMetric) GetTotalRam() uint64 {
