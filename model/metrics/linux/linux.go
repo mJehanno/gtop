@@ -2,77 +2,28 @@ package linux
 
 import (
 	"os"
-	"reflect"
 	"strconv"
 	"strings"
 
+	"github.com/mjehanno/gtop/model/metrics/linux/cpu"
+	"github.com/mjehanno/gtop/model/metrics/linux/memory"
 	"github.com/mjehanno/gtop/model/user"
 )
 
-const tagName = "mem"
-
 type LinuxMetric struct {
-	MemTotal     uint64 `mem:"MemTotal"`
-	MemAvailable uint64 `mem:"MemAvailable"`
-	SwapTotal    uint64 `mem:"SwapTotal"`
-	SwapFree     uint64 `mem:"SwapFree"`
-}
-
-func (l *LinuxMetric) UnMarshal(data []byte) error {
-	m := map[string]uint64{}
-
-	stringed := string(data)
-
-	pured := strings.ReplaceAll(stringed, ":", "")
-
-	lines := strings.Split(pured, "\n")
-
-	for _, v := range lines {
-		fields := strings.Fields(v)
-		if len(fields) > 1 {
-
-			value, err := strconv.ParseUint(fields[1], 10, 64)
-			if err != nil {
-				return err
-			}
-			m[fields[0]] = value
-		}
-	}
-
-	v := reflect.ValueOf(l)
-	mutable := reflect.Indirect(v)
-	t := v.Elem().Type()
-	for i := 0; i < t.NumField(); i++ {
-		if value, ok := t.Field(i).Tag.Lookup(tagName); ok {
-			mutable.FieldByName(value).SetUint(m[value] * 1024)
-		}
-	}
-
-	return nil
+	*memory.Memory
+	CPUs []cpu.CPU
 }
 
 func New() (*LinuxMetric, error) {
 	lm := new(LinuxMetric)
-	err := lm.getMetrics()
+	mem, err := memory.New()
 	if err != nil {
 		return nil, err
 	}
+	lm.Memory = mem
 
 	return lm, nil
-}
-
-func (l *LinuxMetric) getMetrics() error {
-	buf, err := os.ReadFile("/proc/meminfo")
-	if err != nil {
-		return err
-	}
-
-	err = l.UnMarshal(buf)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // GetHostname return the current host hostname.
