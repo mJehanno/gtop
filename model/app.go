@@ -93,7 +93,7 @@ func (a *AppModel) View() string {
 	userLine := labelStyle("Current User:") + spaceSep + a.OS.Metrics.GetCurrentUser().Uid + spaceSep + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + tabSep + labelStyle("Groups:") + spaceSep + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ", ") + cr
 	systemLine := labelStyle("Uptime:") + spaceSep + stringedUptime + tabSep + labelStyle("Network:") + spaceSep + strings.Join(netAddresses, ", ") + cr
 
-	ramLine := labelStyle("Ram usage:") + tabSep + a.ramProgress.View() + spaceSep + humanize.Bytes(a.OS.Metrics.GetTotalRam()-a.OS.Metrics.GetAvailableRam()) + "/" + humanize.Bytes(a.OS.Metrics.GetTotalRam()) + tabSep + labelStyle("Swap usage:") + tabSep + a.swapProgress.View() + cr
+	ramLine := labelStyle("Ram usage:") + tabSep + a.ramProgress.View() + spaceSep + humanize.Bytes(a.OS.Metrics.GetTotalRam()-a.OS.Metrics.GetAvailableRam()) + "/" + humanize.Bytes(a.OS.Metrics.GetTotalRam()) + tabSep + labelStyle("Swap usage:") + tabSep + a.swapProgress.View() + spaceSep + humanize.Bytes(a.OS.Metrics.GetTotalSwap()-a.OS.Metrics.GetAvailableSwap()) + "/" + humanize.Bytes(a.OS.Metrics.GetTotalSwap()) + cr
 
 	textBlock := lipgloss.JoinVertical(0.3, userLine, systemLine)
 	ramBlock := lipgloss.JoinVertical(lipgloss.Left, ramLine)

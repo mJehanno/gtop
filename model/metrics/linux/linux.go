@@ -43,7 +43,7 @@ func (l *LinuxMetric) UnMarshal(data []byte) error {
 	mutable := reflect.Indirect(v)
 	t := v.Elem().Type()
 	for i := 0; i < t.NumField(); i++ {
-		if value, ok := t.Field(i).Tag.Lookup("mem"); ok {
+		if value, ok := t.Field(i).Tag.Lookup(tagName); ok {
 			mutable.FieldByName(value).SetUint(m[value] * 1024)
 		}
 	}
