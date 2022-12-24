@@ -1,6 +1,7 @@
 package linux
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -22,6 +23,13 @@ func New() (*LinuxMetric, error) {
 		return nil, err
 	}
 	lm.Memory = mem
+
+	c, err := cpu.New()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	lm.CPUs = c
 
 	return lm, nil
 }
@@ -72,4 +80,6 @@ func (l *LinuxMetric) GetAvailableSwap() uint64 {
 	return l.SwapFree
 }
 
-func (l *LinuxMetric) GetCpuLoad() {}
+func (l *LinuxMetric) GetCpuLoad() []cpu.CPU {
+	return l.CPUs
+}

@@ -2,6 +2,7 @@ package model
 
 import (
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,7 +15,9 @@ import (
 	"github.com/mjehanno/gtop/model/network"
 )
 
-var labelStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF")).Underline(true).Render
+var labelStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF")).Underline(true)
+var labelStyleRender = labelStyle.Render
+var subLabelStyle = labelStyle.Copy().Bold(false).Italic(true).Underline(false).Render
 var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ab2727")).Render
 var titleStyle = lipgloss.NewStyle().Margin(1).Padding(0, 2).Align(lipgloss.Center).Foreground(lipgloss.Color("228")).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("63")).Render
 
@@ -22,6 +25,7 @@ type AppModel struct {
 	OS           os.Os
 	ramProgress  progress.Model
 	swapProgress progress.Model
+	cpuProgress  []progress.Model
 	interfaces   []network.Interface
 }
 
@@ -30,11 +34,16 @@ func InitialModel() *AppModel {
 		ramProgress:  progress.New(progress.WithDefaultGradient()),
 		swapProgress: progress.New(progress.WithDefaultGradient()),
 		interfaces:   network.GetInterfaces(),
+		cpuProgress:  []progress.Model{},
 	}
 }
 
 func (a *AppModel) Init() tea.Cmd {
 	initOSData(a)
+	for range a.OS.Metrics.GetCpuLoad() {
+		a.cpuProgress = append(a.cpuProgress, progress.New(progress.WithDefaultGradient()))
+	}
+
 	return tea.Batch(tickCommand(time.Second), a.updateProgressesBars())
 }
 
@@ -56,8 +65,13 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		progressSwapModel, cmdSwap := a.swapProgress.Update(msg)
 		a.swapProgress = progressSwapModel.(progress.Model)
-
 		cmds = append(cmds, cmdSwap)
+
+		for i, cpuBar := range a.cpuProgress {
+			model, cmd := cpuBar.Update(msg)
+			cmds = append(cmds, cmd)
+			a.cpuProgress[i] = model.(progress.Model)
+		}
 
 		return a, tea.Batch(cmds...)
 
@@ -90,15 +104,20 @@ func (a *AppModel) View() string {
 		stringedUptime = humanize.Time(time.Now().Add(-time.Second * time.Duration(uptime)))
 	}
 
-	userLine := labelStyle("Current User:") + spaceSep + a.OS.Metrics.GetCurrentUser().Uid + spaceSep + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + tabSep + labelStyle("Groups:") + spaceSep + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ", ") + cr
-	systemLine := labelStyle("Uptime:") + spaceSep + stringedUptime + tabSep + labelStyle("Network:") + spaceSep + strings.Join(netAddresses, ", ") + cr
+	userLine := labelStyleRender("Current User:") + spaceSep + a.OS.Metrics.GetCurrentUser().Uid + spaceSep + a.OS.Metrics.GetCurrentUser().Username + "@" + hostname + tabSep + labelStyleRender("Groups:") + spaceSep + strings.Join(a.OS.Metrics.GetCurrentUser().Groups, ", ") + cr
+	systemLine := labelStyleRender("Uptime:") + spaceSep + stringedUptime + tabSep + labelStyleRender("Network:") + spaceSep + strings.Join(netAddresses, ", ") + cr
 
-	ramLine := labelStyle("Ram usage:") + tabSep + a.ramProgress.View() + spaceSep + humanize.Bytes(a.OS.Metrics.GetTotalRam()-a.OS.Metrics.GetAvailableRam()) + "/" + humanize.Bytes(a.OS.Metrics.GetTotalRam()) + tabSep + labelStyle("Swap usage:") + tabSep + a.swapProgress.View() + spaceSep + humanize.Bytes(a.OS.Metrics.GetTotalSwap()-a.OS.Metrics.GetAvailableSwap()) + "/" + humanize.Bytes(a.OS.Metrics.GetTotalSwap()) + cr
+	ramLine := labelStyleRender("Ram usage:") + tabSep + a.ramProgress.View() + spaceSep + humanize.Bytes(a.OS.Metrics.GetTotalRam()-a.OS.Metrics.GetAvailableRam()) + "/" + humanize.Bytes(a.OS.Metrics.GetTotalRam()) + tabSep + labelStyleRender("Swap usage:") + tabSep + a.swapProgress.View() + spaceSep + humanize.Bytes(a.OS.Metrics.GetTotalSwap()-a.OS.Metrics.GetAvailableSwap()) + "/" + humanize.Bytes(a.OS.Metrics.GetTotalSwap()) + cr
+
+	cpuLines := labelStyleRender("CPUs:") + cr
+	for i, c := range a.OS.Metrics.GetCpuLoad() {
+		cpuinfoLine := subLabelStyle("core:") + spaceSep + strconv.Itoa(c.ProcessorId+1) + tabSep + subLabelStyle("model:") + spaceSep + c.ModelName + tabSep + subLabelStyle("freq:") + spaceSep + humanize.Ftoa(c.Mhz) + "MHz" + tabSep + subLabelStyle("cache size:") + spaceSep + humanize.Bytes(uint64(c.CacheSize)) + cr
+		cpustatLine := subLabelStyle("usage:") + spaceSep + a.cpuProgress[i].View() + cr
+		cpuLines += cpuinfoLine + tabSep + cpustatLine
+	}
 
 	textBlock := lipgloss.JoinVertical(0.3, userLine, systemLine)
-	ramBlock := lipgloss.JoinVertical(lipgloss.Left, ramLine)
-
-	i := lipgloss.JoinVertical(lipgloss.Left, textBlock, ramBlock)
+	i := lipgloss.JoinVertical(lipgloss.Left, textBlock, ramLine, cpuLines)
 
 	s := lipgloss.PlaceHorizontal(120, lipgloss.Center, titleStyle("GTop")) + cr
 	s += lipgloss.PlaceHorizontal(240, lipgloss.Left, i)
@@ -113,6 +132,8 @@ func initOSData(a *AppModel) {
 		a.OS = os.Os{
 			Metrics: metrics,
 		}
+
+		//fmt.Println(a.OS.Metrics.GetCpuLoad())
 	case "windows":
 	case "darwin":
 	case "bsd":
@@ -125,7 +146,17 @@ func updateProgressBar(available, total uint64, bar *progress.Model) tea.Cmd {
 }
 
 func (a *AppModel) updateProgressesBars() tea.Cmd {
-	return tea.Batch(updateProgressBar(a.OS.Metrics.GetAvailableRam(), a.OS.Metrics.GetTotalRam(), &a.ramProgress), updateProgressBar(a.OS.Metrics.GetAvailableSwap(), a.OS.Metrics.GetTotalSwap(), &a.swapProgress))
+	cmds := []tea.Cmd{}
+	cpus := a.OS.Metrics.GetCpuLoad()
+
+	cmds = append(cmds, updateProgressBar(a.OS.Metrics.GetAvailableRam(), a.OS.Metrics.GetTotalRam(), &a.ramProgress))
+	cmds = append(cmds, updateProgressBar(a.OS.Metrics.GetAvailableSwap(), a.OS.Metrics.GetTotalSwap(), &a.swapProgress))
+
+	for i, bar := range a.cpuProgress {
+		cmds = append(cmds, updateProgressBar(cpus[i].GetIdle(), cpus[i].GetTotal(), &bar))
+	}
+
+	return tea.Batch(cmds...)
 }
 
 type tickMsg time.Time

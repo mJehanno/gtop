@@ -1,6 +1,9 @@
 package metrics
 
-import "github.com/mjehanno/gtop/model/user"
+import (
+	"github.com/mjehanno/gtop/model/metrics/linux/cpu"
+	"github.com/mjehanno/gtop/model/user"
+)
 
 type Metric interface {
 	GetHostname() (string, error)
@@ -10,5 +13,5 @@ type Metric interface {
 	GetAvailableRam() uint64
 	GetTotalSwap() uint64
 	GetAvailableSwap() uint64
-	GetCpuLoad()
+	GetCpuLoad() []cpu.CPU
 }
