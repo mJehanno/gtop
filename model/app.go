@@ -55,6 +55,7 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return a, tea.Quit
 		}
 	case tickMsg:
+		initOSData(a)
 		return a, tea.Batch(a.updateProgressesBars(), tickCommand(time.Second))
 	case progress.FrameMsg:
 		cmds := []tea.Cmd{}
