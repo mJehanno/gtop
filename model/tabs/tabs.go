@@ -17,13 +17,14 @@ type Tab struct {
 func GetAllTabs() []Tab {
 	bi := NewBasincInformationModel()
 	bt := Tab{
-		bi,
-		"Basic Information",
+		Model: bi,
+		Name:  "Basic Information",
 	}
 
+	pmm := NewProcessManagerModel()
 	prt := Tab{
-		nil,
-		"Process Management",
+		Model: pmm,
+		Name:  "Process Management",
 	}
 
 	tabs := []Tab{
