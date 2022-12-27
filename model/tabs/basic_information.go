@@ -36,6 +36,9 @@ func NewBasincInformationModel() *BasicInformationModel {
 
 func (b *BasicInformationModel) Init() tea.Cmd {
 	initOSData(b)
+	if len(b.cpuProgress) > 0 {
+		b.cpuProgress = b.cpuProgress[:0]
+	}
 	for range b.OS.Metrics.GetCpuLoad() {
 		b.cpuProgress = append(b.cpuProgress, progress.New(progress.WithDefaultGradient()))
 	}
