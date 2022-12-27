@@ -45,18 +45,18 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (a *AppModel) View() string {
 	s := ""
 
-	tabLine := ""
+	tabLine := []string{}
 
 	for i, tab := range a.tabs {
 		if i == int(a.currentTab) {
-			tabLine += styles.ActivatedTabStyle(tab.Name)
+			tabLine = append(tabLine, styles.ActivatedTabStyle(tab.Name))
 			continue
 		}
-		tabLine += styles.DeactivatedTabStyle(tab.Name)
+		tabLine = append(tabLine, styles.DeactivatedTabStyle(tab.Name))
 	}
 
 	s += lipgloss.PlaceHorizontal(120, lipgloss.Center, styles.TitleStyle("GTop")) + styles.Cr
-	s += lipgloss.PlaceHorizontal(0, lipgloss.Left, tabLine) + styles.Cr
+	s += lipgloss.JoinHorizontal(lipgloss.Bottom, tabLine...) + styles.Cr
 	s += lipgloss.PlaceHorizontal(240, lipgloss.Left, a.tabs[a.currentTab].View())
 
 	return s

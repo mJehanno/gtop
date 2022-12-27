@@ -20,8 +20,15 @@ func GetAllTabs() []Tab {
 		bi,
 		"Basic Information",
 	}
+
+	prt := Tab{
+		nil,
+		"Process Management",
+	}
+
 	tabs := []Tab{
 		bt,
+		prt,
 	}
 
 	return tabs
