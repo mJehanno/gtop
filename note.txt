@@ -1,0 +1,7 @@
+- /proc/[nombre]/fd => une entrée pour chaque fichier que le processus a ouvert. Chaque entrée a le descripteur du fichier pour nom, et est représentée par un lien symbolique sur le vrai fichier. Ainsi, 0 correspond à l'entrée standard, 1 à la sortie standard, 2 à la sortie d'erreur
+- /proc/[nombre]/stat => Informations sur l'état du processus. Ceci est utilisé par ps(1). La définition se trouve dans /usr/src/linux/fs/proc/array.c
+- /proc/[nombre]/status => format human readable de stat et statm (notamment mémoire)
+- /proc/loadavg => Les trois premiers champs de ce fichier sont les charges système indiquant le nombre de tâches dans la file d'attente d'exécution (état R) ou en attente d'entrées-sorties disque (état D) moyennées sur 1, 5, et 15 minutes
+- /proc/net => informations réseaux (maybe check /proc/net/dev ?)
+- /etc/lsd_release => information OS
+- /proc/version => version noyau linux
