@@ -12,6 +12,12 @@
 - [ ] Adds a license and a readme with some gif made with [VHS](https://github.com/charmbracelet/vhs)
 
 
+## Somewhere between V1 and V2
+
+- [ ] Improve error handling
+- [ ] Adds "responsiveness"
+
+
 ## V2
 
 - [ ] Adds MacOS support (`[filename]_darwin.go`)
