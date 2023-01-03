@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -14,15 +15,17 @@ import (
 const pstag = "pidstatus"
 
 type Process struct {
-	PID  int
-	Path string
-	Name string
-	User string
+	PID   int
+	Path  string
+	Name  string
+	User  string
+	Usage uint64
 }
 
 type ProcessStatus struct {
-	Name string `pidstatus:"Name"`
-	Uid  uint64 `pidstatus:"Uid"`
+	Name  string `pidstatus:"Name"`
+	Uid   uint64 `pidstatus:"Uid"`
+	VmRes uint64 `pidstatus:"VmRSS"`
 }
 
 func GetAllProcess() ([]Process, error) {
@@ -67,15 +70,20 @@ func GetAllProcess() ([]Process, error) {
 			}
 
 			p := Process{
-				PID:  pid,
-				Path: fmt.Sprintf("%+v", target),
-				Name: ps.Name,
-				User: processUser.Username,
+				PID:   pid,
+				Path:  fmt.Sprintf("%+v", target),
+				Name:  ps.Name,
+				User:  processUser.Username,
+				Usage: ps.VmRes,
 			}
 
 			result = append(result, p)
 		}
 	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Usage > result[j].Usage
+	})
 
 	return result, nil
 }
