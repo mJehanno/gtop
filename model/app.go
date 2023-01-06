@@ -19,7 +19,7 @@ func InitialModel() *AppModel {
 }
 
 func (a *AppModel) Init() tea.Cmd {
-	return a.tabs[a.currentTab].Init()
+	return tea.Batch(a.tabs[a.currentTab].Init(), tabs.SyncedTick)
 }
 
 func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

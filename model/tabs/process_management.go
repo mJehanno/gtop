@@ -2,7 +2,6 @@ package tabs
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -52,7 +51,7 @@ func NewProcessManagerModel() *ProcessManagerModel {
 }
 
 func (p *ProcessManagerModel) Init() tea.Cmd {
-	return tea.Batch(cmds.TickCommand(400 * time.Millisecond))
+	return nil
 }
 
 func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -66,7 +65,7 @@ func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		p.processes = ps
 		p.updateTable(&p.table)
 		p.table, cmd = p.table.Update(msg)
-		return p, tea.Batch(cmd, cmds.TickCommand(400*time.Millisecond))
+		return p, tea.Batch(cmd, SyncedTick)
 	}
 
 	var cmd tea.Cmd

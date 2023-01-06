@@ -43,14 +43,14 @@ func (b *BasicInformationModel) Init() tea.Cmd {
 		b.cpuProgress = append(b.cpuProgress, progress.New(progress.WithDefaultGradient()))
 	}
 
-	return tea.Batch(cmds.TickCommand(time.Second), b.updateProgressesBars())
+	return tea.Batch(b.updateProgressesBars())
 }
 
 func (b *BasicInformationModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case cmds.TickMsg:
 		initOSData(b)
-		return b, tea.Batch(b.updateProgressesBars(), cmds.TickCommand(time.Second))
+		return b, tea.Batch(b.updateProgressesBars(), SyncedTick)
 	case progress.FrameMsg:
 		cmds := []tea.Cmd{}
 		progressRamModel, cmdRam := b.ramProgress.Update(msg)
