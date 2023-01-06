@@ -34,9 +34,8 @@ func NewProcessManagerModel() *ProcessManagerModel {
 	}
 
 	style := table.DefaultStyles()
-	style.Header = style.Header.BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240")).Bold(true)
-	style.Cell = style.Cell.BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240")).Margin(0)
-	style.Selected = style.Selected.Foreground(lipgloss.Color("228")).BorderForeground(lipgloss.Color("63")).Italic(true).Bold(false)
+	style.Header = style.Header.Bold(true).BorderForeground(lipgloss.Color("63"))
+	style.Selected = style.Selected.UnsetBorderForeground().Italic(false).Bold(true).Background(lipgloss.Color("63")).Foreground(lipgloss.Color("223"))
 
 	tab := table.New(
 		table.WithColumns(columns),
@@ -44,8 +43,6 @@ func NewProcessManagerModel() *ProcessManagerModel {
 		table.WithStyles(style),
 		table.WithHeight(30),
 	)
-
-	tab.Focus()
 
 	model.updateTable(&tab)
 
@@ -72,10 +69,6 @@ func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return p, tea.Batch(cmd, SyncedTick)
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "up":
-			p.table.MoveUp(1)
-		case "down":
-			p.table.MoveDown(1)
 		}
 	}
 
