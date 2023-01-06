@@ -36,12 +36,16 @@ func NewProcessManagerModel() *ProcessManagerModel {
 	style := table.DefaultStyles()
 	style.Header = style.Header.BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240")).Bold(true)
 	style.Cell = style.Cell.BorderStyle(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("240")).Margin(0)
+	style.Selected = style.Selected.Foreground(lipgloss.Color("228")).BorderForeground(lipgloss.Color("63")).Italic(true).Bold(false)
 
 	tab := table.New(
 		table.WithColumns(columns),
 		table.WithFocused(true),
 		table.WithStyles(style),
+		table.WithHeight(30),
 	)
+
+	tab.Focus()
 
 	model.updateTable(&tab)
 
@@ -55,7 +59,7 @@ func (p *ProcessManagerModel) Init() tea.Cmd {
 }
 
 func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg.(type) {
+	switch msg := msg.(type) {
 	case cmds.TickMsg:
 		var cmd tea.Cmd
 		ps, err := process.GetAllProcess()
@@ -66,6 +70,13 @@ func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		p.updateTable(&p.table)
 		p.table, cmd = p.table.Update(msg)
 		return p, tea.Batch(cmd, SyncedTick)
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "up":
+			p.table.MoveUp(1)
+		case "down":
+			p.table.MoveDown(1)
+		}
 	}
 
 	var cmd tea.Cmd
