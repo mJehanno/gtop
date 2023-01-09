@@ -3,10 +3,10 @@ package tabs
 import (
 	"strconv"
 
-	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
+	"github.com/evertras/bubble-table/table"
 	"github.com/mjehanno/gtop/model/cmds"
 	"github.com/mjehanno/gtop/model/metrics/linux/process"
 	"github.com/mjehanno/gtop/model/styles"
@@ -18,6 +18,14 @@ type ProcessManagerModel struct {
 	err       error
 }
 
+const (
+	pid         = "pid"
+	user        = "user"
+	processName = "processName"
+	processPath = "process"
+	ramUsage    = "ramUsage"
+)
+
 func NewProcessManagerModel() *ProcessManagerModel {
 	ps, err := process.GetAllProcess()
 	model := ProcessManagerModel{
@@ -26,27 +34,20 @@ func NewProcessManagerModel() *ProcessManagerModel {
 	}
 
 	columns := []table.Column{
-		{Title: "PID", Width: 6},
-		{Title: "User", Width: 10},
-		{Title: "Process Name", Width: 15},
-		{Title: "Process", Width: 50},
-		{Title: "Ram Usage", Width: 20},
+		table.NewColumn(pid, "PID", 6),
+		table.NewColumn(user, "User", 10),
+		table.NewColumn(processName, "Process Name", 15),
+		table.NewColumn(processPath, "Process", 50),
+		table.NewColumn(ramUsage, "Ram Usage", 20),
 	}
 
-	style := table.DefaultStyles()
-	style.Header = style.Header.Bold(true).BorderForeground(lipgloss.Color("63"))
-	style.Selected = style.Selected.UnsetBorderForeground().Italic(false).Bold(true).Background(lipgloss.Color("63")).Foreground(lipgloss.Color("223"))
+	tab := table.New(columns)
+	tab = model.updateTable(&tab)
+	selectedStyle := lipgloss.NewStyle().Background(styles.RetroBlue).Bold(true).Foreground(styles.Yellow)
+	headerStyle := lipgloss.NewStyle().Foreground(styles.White)
+	baseStyle := lipgloss.NewStyle().Foreground(styles.BasicGrey)
 
-	tab := table.New(
-		table.WithColumns(columns),
-		table.WithFocused(true),
-		table.WithStyles(style),
-		table.WithHeight(30),
-	)
-
-	model.updateTable(&tab)
-
-	model.table = tab
+	model.table = tab.WithPageSize(25).Focused(true).BorderRounded().HighlightStyle(selectedStyle).WithPaginationWrapping(false).HeaderStyle(headerStyle).WithBaseStyle(baseStyle)
 
 	return &model
 }
@@ -64,8 +65,8 @@ func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			p.err = err
 		}
 		p.processes = ps
-		p.updateTable(&p.table)
-		p.table, cmd = p.table.Update(msg)
+		p.table = p.updateTable(&p.table)
+		_, cmd = p.table.Update(msg)
 		return p, tea.Batch(cmd, SyncedTick)
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -88,12 +89,12 @@ func (p *ProcessManagerModel) View() string {
 	return s
 }
 
-func (p *ProcessManagerModel) updateTable(tab *table.Model) {
+func (p *ProcessManagerModel) updateTable(tab *table.Model) table.Model {
 	rows := []table.Row{}
 
 	for _, p := range p.processes {
-		rows = append(rows, table.Row{strconv.Itoa(p.PID), p.User, p.Name, p.Path, humanize.Bytes(p.Usage * 1024)})
+		rows = append(rows, table.NewRow(table.RowData{pid: strconv.Itoa(p.PID), user: p.User, processName: p.Name, processPath: p.Path, ramUsage: humanize.Bytes(p.Usage * 1024)}))
 	}
 
-	tab.SetRows(rows)
+	return tab.WithRows(rows)
 }
