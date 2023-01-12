@@ -106,7 +106,7 @@ func (b *BasicInformationModel) View() string {
 		cpuLines += cpuinfoLine + styles.TabSep + cpustatLine
 	}
 
-	textBlock := lipgloss.JoinVertical(0.3, userLine, systemLine)
+	textBlock := lipgloss.JoinVertical(lipgloss.Left, userLine, systemLine)
 	s := lipgloss.JoinVertical(lipgloss.Left, textBlock, ramLine, cpuLines)
 
 	return s
