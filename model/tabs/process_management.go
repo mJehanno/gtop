@@ -34,10 +34,10 @@ func NewProcessManagerModel() *ProcessManagerModel {
 	}
 
 	columns := []table.Column{
-		table.NewColumn(pid, "PID", 6),
-		table.NewColumn(user, "User", 10),
-		table.NewColumn(processName, "Process Name", 15),
-		table.NewColumn(processPath, "Process", 50),
+		table.NewColumn(pid, "PID", 6).WithFiltered(true),
+		table.NewColumn(user, "User", 10).WithFiltered(true),
+		table.NewColumn(processName, "Process Name", 15).WithFiltered(true),
+		table.NewColumn(processPath, "Process", 50).WithFiltered(true),
 		table.NewColumn(ramUsage, "Ram Usage", 20),
 	}
 
@@ -47,7 +47,7 @@ func NewProcessManagerModel() *ProcessManagerModel {
 	headerStyle := lipgloss.NewStyle().Foreground(styles.White)
 	baseStyle := lipgloss.NewStyle().Foreground(styles.BasicGrey)
 
-	model.table = tab.WithPageSize(25).Focused(true).BorderRounded().HighlightStyle(selectedStyle).WithPaginationWrapping(false).HeaderStyle(headerStyle).WithBaseStyle(baseStyle)
+	model.table = tab.WithPageSize(25).Focused(true).BorderRounded().HighlightStyle(selectedStyle).WithPaginationWrapping(false).HeaderStyle(headerStyle).WithBaseStyle(baseStyle).Filtered(true)
 
 	return &model
 }
