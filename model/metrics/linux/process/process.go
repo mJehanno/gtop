@@ -2,6 +2,7 @@ package process
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -33,52 +34,61 @@ func GetAllProcess() ([]Process, error) {
 
 	matches, err := filepath.Glob("/proc/*/exe")
 	if err != nil {
+		log.Fatal(err)
 		return nil, err
 	}
 
 	for _, file := range matches {
+		var p Process
 		target, _ := os.Readlink(file)
+		splittedPath := strings.FieldsFunc(file, func(r rune) bool {
+			return r == '/'
+		})
+
+		if splittedPath[1] == "self" || splittedPath[1] == "thread-self" {
+			continue
+		}
+
+		pid, err := strconv.Atoi(splittedPath[1])
+		if err != nil {
+			return nil, err
+		}
+
+		filePath := getStatusFilePath(splittedPath[0], splittedPath[1])
+		statusFile, err := os.ReadFile(filePath)
+		if err != nil {
+			return nil, err
+		}
+
+		var ps ProcessStatus
+
+		err = ps.Unmarshal(statusFile)
+		if err != nil {
+			return nil, err
+
+		}
+		processUser, err := user.LookupId(strconv.FormatUint(ps.Uid, 10))
+		if err != nil {
+			return nil, err
+		}
 		if len(target) > 0 {
-			splittedPath := strings.FieldsFunc(file, func(r rune) bool {
-				return r == '/'
-			})
-
-			if splittedPath[1] == "self" || splittedPath[1] == "thread-self" {
-				continue
-			}
-
-			pid, err := strconv.Atoi(splittedPath[1])
-			if err != nil {
-				return nil, err
-			}
-
-			statusFile, err := os.ReadFile(getStatusFilePath(splittedPath[0], splittedPath[1]))
-			if err != nil {
-				return nil, err
-			}
-
-			var ps ProcessStatus
-
-			err = ps.Unmarshal(statusFile)
-			if err != nil {
-				return nil, err
-
-			}
-			processUser, err := user.LookupId(strconv.FormatUint(ps.Uid, 10))
-			if err != nil {
-				return nil, err
-			}
-
-			p := Process{
+			p = Process{
 				PID:   pid,
 				Path:  fmt.Sprintf("%+v", target),
 				Name:  ps.Name,
 				User:  processUser.Username,
 				Usage: ps.VmRes,
 			}
-
-			result = append(result, p)
+		} else {
+			p = Process{
+				PID:   pid,
+				Path:  "",
+				Name:  ps.Name,
+				User:  processUser.Username,
+				Usage: ps.VmRes,
+			}
 		}
+		result = append(result, p)
 	}
 
 	sort.Slice(result, func(i, j int) bool {
@@ -111,17 +121,18 @@ func (p *ProcessStatus) Unmarshal(data []byte) error {
 
 	for i := 0; i < reflectedType.NumField(); i++ {
 		if tagName, ok := reflectedType.Field(i).Tag.Lookup(pstag); ok {
-			switch reflectedType.Field(i).Type.Name() {
-			case "uint64":
-				splitString := strings.Fields(tmp[tagName])
-
-				value, err := strconv.ParseUint(splitString[0], 10, 64)
-				if err != nil {
-					return err
+			if v, ok := tmp[tagName]; ok {
+				switch reflectedType.Field(i).Type.Name() {
+				case "uint64":
+					splitString := strings.Fields(v)
+					value, err := strconv.ParseUint(splitString[0], 10, 64)
+					if err != nil {
+						return err
+					}
+					reflectedValue.Elem().Field(i).SetUint(value)
+				default:
+					reflectedValue.Elem().Field(i).Set(reflect.ValueOf(v))
 				}
-				reflectedValue.Elem().Field(i).SetUint(value)
-			default:
-				reflectedValue.Elem().Field(i).Set(reflect.ValueOf(tmp[tagName]))
 			}
 		}
 	}
