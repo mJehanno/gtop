@@ -5,3 +5,35 @@
 - /proc/net => informations réseaux (maybe check /proc/net/dev ?)
 - /etc/lsd_release => information OS
 - /proc/version => version noyau linux
+
+
+
+Basic Information Tab :
+
+- Information about OS (distrib + kernel version + uptime)
+- Information about current user (uid, groups)
+- Information about ram (total and free)
+- Information about swap (total and free)
+- Information about CPU (model, and nomber of core)
+- Information about GPU Model (if possible)
+- Information about network (current public IP Address)
+
+Usage Tab :
+
+- Ram and swap usage (graph view)
+- cpu usage (graph view)
+- disk usage (graph view)
+
+Process Manager Tab :
+
+- List of process (pid, name, path, mem-usage,cpu-usage)
+- Tree view of process and sub-process
+- Send signal to process (ex : SIGTERM)
+- Filter process on user, name, pid
+- Sort process by mem-usage or cpu-usage or name (?)
+- Port used by process
+
+Network Manager Tab : 
+
+- List all network card with IP
+- Data received / Data Sent

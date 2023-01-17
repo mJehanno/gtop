@@ -11,7 +11,9 @@ type TabsEnum int
 
 const (
 	BasicInformation TabsEnum = iota
+	Usage
 	ProcessManager
+	Network
 )
 
 var SyncedTick tea.Cmd = cmds.TickCommand(400 * time.Millisecond)
