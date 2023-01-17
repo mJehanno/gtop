@@ -94,6 +94,8 @@ func (b *BasicInformationModel) View() string {
 		stringedUptime = humanize.Time(time.Now().Add(-time.Second * time.Duration(uptime)))
 	}
 
+	distrib := styles.LabelStyleRender("Distribution:") + styles.SpaceSep + b.OS.Metrics.GetDistribution()
+
 	userLine := styles.LabelStyleRender("Current User:") + styles.SpaceSep + b.OS.Metrics.GetCurrentUser().Uid + styles.SpaceSep + b.OS.Metrics.GetCurrentUser().Username + "@" + hostname + styles.TabSep + styles.LabelStyleRender("Groups:") + styles.SpaceSep + strings.Join(b.OS.Metrics.GetCurrentUser().Groups, ", ") + styles.Cr
 	systemLine := styles.LabelStyleRender("Uptime:") + styles.SpaceSep + stringedUptime + styles.TabSep + styles.LabelStyleRender("Network:") + styles.SpaceSep + strings.Join(netAddresses, ", ") + styles.Cr
 
@@ -106,7 +108,7 @@ func (b *BasicInformationModel) View() string {
 		cpuLines += cpuinfoLine + styles.TabSep + cpustatLine
 	}
 
-	textBlock := lipgloss.JoinVertical(lipgloss.Left, userLine, systemLine)
+	textBlock := lipgloss.JoinVertical(lipgloss.Left, distrib, userLine, systemLine)
 	s := lipgloss.JoinVertical(lipgloss.Left, textBlock, ramLine, cpuLines)
 
 	return s

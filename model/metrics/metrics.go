@@ -6,6 +6,7 @@ import (
 )
 
 type Metric interface {
+	GetDistribution() string
 	GetHostname() (string, error)
 	GetCurrentUser() *user.User
 	GetUptime() (float64, error)

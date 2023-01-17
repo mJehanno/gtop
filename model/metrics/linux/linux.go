@@ -8,12 +8,14 @@ import (
 
 	"github.com/mjehanno/gtop/model/metrics/linux/cpu"
 	"github.com/mjehanno/gtop/model/metrics/linux/memory"
+	"github.com/mjehanno/gtop/model/metrics/linux/system"
 	"github.com/mjehanno/gtop/model/user"
 )
 
 type LinuxMetric struct {
 	*memory.Memory
-	CPUs []cpu.CPU
+	CPUs    []cpu.CPU
+	SysInfo *system.SystemInfo
 }
 
 func New() (*LinuxMetric, error) {
@@ -26,12 +28,22 @@ func New() (*LinuxMetric, error) {
 
 	c, err := cpu.New()
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	lm.CPUs = c
 
+	s, err := system.New()
+	if err != nil {
+		return nil, err
+	}
+	lm.SysInfo = s
+
 	return lm, nil
+}
+
+func (l *LinuxMetric) GetDistribution() string {
+	return fmt.Sprintf("%s %s", l.SysInfo.DistribName, l.SysInfo.DistribVersion)
+
 }
 
 // GetHostname return the current host hostname.
