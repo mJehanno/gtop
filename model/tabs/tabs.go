@@ -36,8 +36,15 @@ func GetAllTabs() []Tab {
 		Name:  "Process Management",
 	}
 
+	um, _ := NewUsageModel()
+	ut := Tab{
+		Model: um,
+		Name:  "Usage",
+	}
+
 	tabs := []Tab{
 		bt,
+		ut,
 		prt,
 	}
 
