@@ -2,7 +2,7 @@
 
 ## V1
 
-- [ ] Change some filenames so that linux targeted file only get build on linux (`[filename]_linux.go`), this might need some refacto
+- [X] Change some filenames so that linux targeted file only get build on linux (`[filename]_linux.go`), this might need some refacto
 - [ ] Fix cpu usage => progress bar is always empty, freq might be the metric we need to set it as it shows current freq and not total freq
 - [X] Better-ui/ux for process manager table (probably use this : [bubble-table](https://github.com/Evertras/bubble-table))
 - [X] Process manager should be able to filter on user input  (will be fixed with bubble-table)

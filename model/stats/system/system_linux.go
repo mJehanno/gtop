@@ -3,13 +3,20 @@ package system
 import (
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/mjehanno/gtop/model/stats/system/current_user"
 )
 
 type SystemInfo struct {
 	DistribName    string
 	DistribVersion string
+	KernelVersion  string
+	Hostname       string
+	Uptime         float64
+	User           *current_user.User
 }
 
 func New() (*SystemInfo, error) {
@@ -22,6 +29,15 @@ func New() (*SystemInfo, error) {
 
 	s.DistribName = o.Name
 	s.DistribVersion = o.Version
+
+	s.KernelVersion, err = getKernelVersion()
+	if err != nil {
+		return &s, err
+	}
+
+	s.User = current_user.New()
+	s.Hostname, _ = getHostname()
+	s.Uptime, _ = getUptime()
 
 	return &s, nil
 }
@@ -82,6 +98,19 @@ func (o *OSRelease) UnMarshal(data []byte) error {
 	return nil
 }
 
+func getKernelVersion() (string, error) {
+	file, err := os.ReadFile("/proc/version")
+	if err != nil {
+		return "", err
+	}
+
+	stringed := string(file)
+
+	s := strings.SplitN(stringed, "(", 2)
+
+	return strings.TrimSpace(s[0]), nil
+}
+
 func toUpperLower(s string) string {
 	result := []rune{}
 	for i, r := range s {
@@ -92,4 +121,27 @@ func toUpperLower(s string) string {
 		result = append(result, unicode.ToUpper(r))
 	}
 	return string(result)
+}
+
+func getHostname() (string, error) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "", err
+	}
+	return hostname, nil
+}
+
+func getUptime() (float64, error) {
+	buf, err := os.ReadFile("/proc/uptime")
+	if err != nil {
+		return 0, err
+	}
+	fields := strings.Fields(string(buf))
+
+	uptime, err := strconv.ParseFloat(fields[0], 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return uptime, nil
 }

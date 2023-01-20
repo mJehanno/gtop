@@ -34,6 +34,12 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				a.currentTab = 0
 			}
 			return a, a.tabs[a.currentTab].Init()
+		case "shift+tab":
+			a.currentTab--
+			if int(a.currentTab) < 0 {
+				a.currentTab = tabs.TabsEnum(len(a.tabs) - 1)
+			}
+			return a, a.tabs[a.currentTab].Init()
 		}
 	}
 

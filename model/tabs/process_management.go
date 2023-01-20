@@ -8,7 +8,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/evertras/bubble-table/table"
 	"github.com/mjehanno/gtop/model/cmds"
-	"github.com/mjehanno/gtop/model/metrics/linux/process"
+	"github.com/mjehanno/gtop/model/stats/metrics/process"
 	"github.com/mjehanno/gtop/model/styles"
 )
 

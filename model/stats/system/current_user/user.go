@@ -1,4 +1,4 @@
-package user
+package current_user
 
 import "os/user"
 
