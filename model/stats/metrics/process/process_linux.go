@@ -11,12 +11,15 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
 const pstag = "pidstatus"
 
 type Process struct {
-	PID   int
+	PID   uint64
+	Ppid  uint64
 	Path  string
 	Name  string
 	User  string
@@ -27,6 +30,7 @@ type ProcessStatus struct {
 	Name  string `pidstatus:"Name"`
 	Uid   uint64 `pidstatus:"Uid"`
 	VmRes uint64 `pidstatus:"VmRSS"`
+	Ppid  uint64 `pidstatus:"PPid"`
 }
 
 func GetAllProcess() ([]Process, error) {
@@ -49,7 +53,7 @@ func GetAllProcess() ([]Process, error) {
 			continue
 		}
 
-		pid, err := strconv.Atoi(splittedPath[1])
+		pid, err := strconv.ParseUint(splittedPath[1], 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -71,23 +75,20 @@ func GetAllProcess() ([]Process, error) {
 		if err != nil {
 			return nil, err
 		}
-		if len(target) > 0 {
-			p = Process{
-				PID:   pid,
-				Path:  fmt.Sprintf("%+v", target),
-				Name:  ps.Name,
-				User:  processUser.Username,
-				Usage: ps.VmRes,
-			}
-		} else {
-			p = Process{
-				PID:   pid,
-				Path:  "",
-				Name:  ps.Name,
-				User:  processUser.Username,
-				Usage: ps.VmRes,
-			}
+		p = Process{
+			PID:   pid,
+			Name:  ps.Name,
+			User:  processUser.Username,
+			Usage: ps.VmRes,
+			Ppid:  ps.Ppid,
 		}
+
+		if len(target) > 0 {
+			p.Path = fmt.Sprintf("%+v", target)
+		} else {
+			p.Path = ""
+		}
+
 		result = append(result, p)
 	}
 
@@ -109,9 +110,7 @@ func (p *ProcessStatus) Unmarshal(data []byte) error {
 
 	for _, line := range lines {
 		if len(line) > 0 {
-			fields := strings.FieldsFunc(line, func(r rune) bool {
-				return r == ':'
-			})
+			fields := strings.FieldsFunc(line, func(r rune) bool { return r == ':' })
 			tmp[fields[0]] = strings.Trim(fields[1], " 	kB")
 		}
 	}
@@ -138,4 +137,24 @@ func (p *ProcessStatus) Unmarshal(data []byte) error {
 	}
 
 	return nil
+}
+
+func TreeMode(processes []Process) map[Process][]Process {
+	m := map[Process][]Process{}
+	sort.Slice(processes, func(i, j int) bool {
+		return processes[i].PID > processes[j].PID
+	})
+	for _, p := range processes {
+		if p.Ppid != 0 {
+			index := slices.IndexFunc(processes, func(pr Process) bool {
+				return pr.PID == p.Ppid
+			})
+
+			if index != -1 {
+				m[processes[index]] = append(m[processes[index]], p)
+			}
+		}
+	}
+
+	return m
 }

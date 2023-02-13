@@ -3,8 +3,8 @@ package model
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mjehanno/gtop/model/components/tabs"
 	"github.com/mjehanno/gtop/model/styles"
-	"github.com/mjehanno/gtop/model/tabs"
 )
 
 type AppModel struct {
@@ -24,6 +24,8 @@ func (a *AppModel) Init() tea.Cmd {
 
 func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		a.tabs[a.currentTab].Update(msg)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
@@ -51,19 +53,19 @@ func (a *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (a *AppModel) View() string {
 	s := ""
 
-	tabLine := []string{}
+	tabs := []string{}
 
 	for i, tab := range a.tabs {
 		if i == int(a.currentTab) {
-			tabLine = append(tabLine, styles.ActivatedTabStyle(tab.Name))
+			tabs = append(tabs, styles.ActivatedTabStyle(tab.Name))
 			continue
 		}
-		tabLine = append(tabLine, styles.DeactivatedTabStyle(tab.Name))
+		tabs = append(tabs, styles.DeactivatedTabStyle(tab.Name))
 	}
 
 	s += lipgloss.PlaceHorizontal(120, lipgloss.Center, styles.TitleStyle("GTop")) + styles.Cr
-	s += lipgloss.JoinHorizontal(lipgloss.Bottom, tabLine...) + styles.Cr
-	s += lipgloss.PlaceHorizontal(240, lipgloss.Left, a.tabs[a.currentTab].View())
+	tabline := lipgloss.JoinHorizontal(lipgloss.Bottom, tabs...) + styles.Cr
+	s += lipgloss.JoinVertical(lipgloss.Left, tabline, a.tabs[a.currentTab].View())
 
 	return s
 }

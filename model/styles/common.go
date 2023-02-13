@@ -18,6 +18,7 @@ var TitleStyle = lipgloss.NewStyle().Margin(1).Padding(0, 2).Align(lipgloss.Cent
 var TabStyle = lipgloss.NewStyle().Padding(0, 1).Margin(0, 0, 1).Align(lipgloss.Center).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(RetroBlue).BorderBottom(false).BorderTop(true).BorderLeft(true).BorderRight(true)
 var ActivatedTabStyle = TabStyle.Copy().Bold(true).Foreground(White).Render
 var DeactivatedTabStyle = TabStyle.Copy().Italic(true).Foreground(BasicGrey).Render
+var ModalStyle = lipgloss.NewStyle().Padding(2, 1).BorderStyle(lipgloss.RoundedBorder()).BorderForeground(RetroBlue)
 
 const (
 	TabSep   = "    "

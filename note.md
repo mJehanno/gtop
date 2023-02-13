@@ -3,8 +3,12 @@
 - /proc/[nombre]/status => format human readable de stat et statm (notamment mémoire)
 - /proc/loadavg => Les trois premiers champs de ce fichier sont les charges système indiquant le nombre de tâches dans la file d'attente d'exécution (état R) ou en attente d'entrées-sorties disque (état D) moyennées sur 1, 5, et 15 minutes
 - /proc/net => informations réseaux (maybe check /proc/net/dev ?)
-- /etc/lsd_release => information OS
-- /proc/version => version noyau linux
+- /etc/lsd_release => information OS - OK
+- /proc/version => version noyau linux - OK
+
+
+Use [this repo](https://github.com/knipferrc/teacup#image) to display images of distribution in basic information. It needs either to check connectivity before retrieving assets on official website (and maybe resize) or embed images as assez (maybe using `go:embed`)
+
 
 
 Revoir le modèle de données : 
@@ -17,7 +21,7 @@ Stats - For Linux/ For Mac / For Windows (only need to change suffix in filename
 
 Basic Information Tab :
 
-- Information about OS (distrib + kernel version + uptime) - miss kernel
+- Information about OS (distrib + kernel version + uptime) - ok
 - Information about current user (uid, groups) - ok
 - Information about ram (total and free) - ok
 - Information about swap (total and free) - ok

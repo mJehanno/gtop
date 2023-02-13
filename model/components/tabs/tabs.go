@@ -42,17 +42,17 @@ func GetAllTabs() []Tab {
 		Name:  "Usage",
 	}
 
-	nm, _ := NewNetworkTabModel()
-	nt := Tab{
-		Model: nm,
-		Name:  "Network",
-	}
+	// nm, _ := NewNetworkTabModel()
+	// nt := Tab{
+	// 	Model: nm,
+	// 	Name:  "Network",
+	// }
 
 	tabs := []Tab{
 		bt,
 		ut,
 		prt,
-		nt,
+		//nt,
 	}
 
 	return tabs
