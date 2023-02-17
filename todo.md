@@ -7,7 +7,7 @@
 - [X] Better-ui/ux for process manager table (probably use this : [bubble-table](https://github.com/Evertras/bubble-table))
 - [X] Process manager should be able to filter on user input  (will be fixed with bubble-table)
 - [ ] Process manager should sort process based on cpu/mem usage
-- [ ] Process manager should be able to send signals to process (ex: SIGTERM)
+- [X] Process manager should be able to send signals to process (ex: SIGTERM)
 - [ ] Adds goreleaser (go binary, apt, aur, snap ?, homebrew, chocolatey) - only linux based for V1 rest for V2
 - [ ] Adds a license and a readme with some gif made with [VHS](https://github.com/charmbracelet/vhs)
 - [X] Refactor tick to have only one in whole app (appmodel) instead of one per tabs
