@@ -28,29 +28,26 @@ type SignalListModel struct {
 }
 
 func NewSignalListModel() *SignalListModel {
-	var s *SignalListModel
-	items := []list.Item{}
-
-	for i := syscall.SIGABRT; i < syscall.SIGXFSZ; i++ {
-		name := unix.SignalName(i)
-		items = append(items, signalItem{name: name, description: i.String(), hiddenValue: i})
-	}
-
-	s = &SignalListModel{
+	s := &SignalListModel{
 		List:    list.New(nil, list.NewDefaultDelegate(), 0, 0),
 		padding: 1,
 	}
 	s.List.Title = "Signals"
 	s.List.SetShowHelp(false)
-	for _, item := range items {
-		s.List.InsertItem(len(s.List.Items()), item)
-	}
 
 	return s
 }
 
 func (s *SignalListModel) Init() tea.Cmd {
-	return nil
+	items := []list.Item{}
+	for i := syscall.Signal(0); i < syscall.Signal(255); i++ {
+		name := unix.SignalName(i)
+		if name != "" {
+			items = append(items, signalItem{name: name, description: i.String(), hiddenValue: i})
+		}
+	}
+
+	return s.List.SetItems(items)
 }
 
 func (s *SignalListModel) Width() int {
@@ -79,7 +76,7 @@ func (s *SignalListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (s *SignalListModel) SetSize(x, y int) {
 	s.width, s.height = x, y
-	s.List.SetSize(x-s.padding, y-s.padding)
+	s.List.SetSize(x, y)
 }
 
 func (s *SignalListModel) View() string {

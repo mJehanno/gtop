@@ -20,7 +20,18 @@ var SyncedTick tea.Cmd = cmds.TickCommand(400 * time.Millisecond)
 
 type Tab struct {
 	tea.Model
-	Name string
+	Name          string
+	width, height int
+}
+
+func (t *Tab) SetSize(w, h int) {
+	t.width, t.height = w, h
+
+	switch t.Model.(type) {
+	case *ProcessManagerModel:
+		m := t.Model.(*ProcessManagerModel)
+		m.SetSize(w, h)
+	}
 }
 
 func GetAllTabs() []Tab {

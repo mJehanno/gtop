@@ -111,7 +111,8 @@ func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			p.signalModal.SetSize(p.width/3, p.height/2)
 			pid, _ := strconv.Atoi(p.table.HighlightedRow().Data["pid"].(string))
 			p.signalModal.Pid = pid
-			return p, nil
+			cmd := p.signalModal.Init()
+			return p, cmd
 		}
 	}
 
