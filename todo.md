@@ -6,7 +6,7 @@
 - [ ] Fix cpu usage => progress bar is always empty, freq might be the metric we need to set it as it shows current freq and not total freq
 - [X] Better-ui/ux for process manager table (probably use this : [bubble-table](https://github.com/Evertras/bubble-table))
 - [X] Process manager should be able to filter on user input  (will be fixed with bubble-table)
-- [ ] Process manager should sort process based on cpu/mem usage
+- [/] Process manager should sort process based on cpu/mem usage
 - [X] Process manager should be able to send signals to process (ex: SIGTERM)
 - [ ] Adds goreleaser (go binary, apt, aur, snap ?, homebrew, chocolatey) - only linux based for V1 rest for V2
 - [ ] Adds a license and a readme with some gif made with [VHS](https://github.com/charmbracelet/vhs)
