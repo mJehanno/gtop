@@ -12,6 +12,7 @@ import (
 type signalItem struct {
 	name        string
 	description string
+	hiddenValue syscall.Signal
 }
 
 func (i signalItem) Title() string       { return i.name }
@@ -32,7 +33,7 @@ func NewSignalListModel() *SignalListModel {
 
 	for i := syscall.SIGABRT; i < syscall.SIGXFSZ; i++ {
 		name := unix.SignalName(i)
-		items = append(items, signalItem{name: name, description: i.String()})
+		items = append(items, signalItem{name: name, description: i.String(), hiddenValue: i})
 	}
 
 	s = &SignalListModel{
@@ -66,12 +67,14 @@ func (s *SignalListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "esc":
 			return s, cmds.LeaveOverlay()
+		case "enter":
+			selected := s.List.Items()[s.List.Index()].(signalItem)
+			cmds.SendSignal(uint64(s.Pid), selected.hiddenValue)
 		}
 	}
 	var cmd tea.Cmd
 	s.List, cmd = s.List.Update(msg)
 	return s, cmd
-	//cmds.SendSignal(s.Pid, syscall.SIGTERM)
 }
 
 func (s *SignalListModel) SetSize(x, y int) {

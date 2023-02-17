@@ -20,6 +20,8 @@ type ProcessManagerModel struct {
 	treeMode         bool
 	isSignalListOpen bool
 	signalModal      *modal.SignalListModel
+	width            int
+	height           int
 }
 
 const (
@@ -67,8 +69,10 @@ func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		p.table = p.table.WithMaxTotalWidth(2 * msg.Width / 3)
+		p.width, p.height = msg.Width, msg.Height
+
 		if p.isSignalListOpen {
-			p.signalModal.SetSize(msg.Width/3, msg.Height)
+			p.signalModal.SetSize(msg.Width/3, msg.Height/3)
 			m, cmd := p.signalModal.List.Update(msg)
 			p.signalModal.List = m
 			return p, cmd
@@ -104,8 +108,10 @@ func (p *ProcessManagerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "f9":
 			p.isSignalListOpen = true
 			p.signalModal = modal.NewSignalListModel()
-			//pid := p.table.HighlightedRow().Data["pid"]
-			//realpid, _ := strconv.ParseUint(pid.(string), 10, 64)
+			p.signalModal.SetSize(p.width/3, p.height/2)
+			pid, _ := strconv.Atoi(p.table.HighlightedRow().Data["pid"].(string))
+			p.signalModal.Pid = pid
+			return p, nil
 		}
 	}
 
@@ -152,4 +158,8 @@ func (p *ProcessManagerModel) updateTable(tab *table.Model) table.Model {
 	}
 
 	return tab.WithRows(rows)
+}
+
+func (p *ProcessManagerModel) SetSize(width, height int) {
+	p.width, p.height = width, height
 }
