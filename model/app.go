@@ -69,7 +69,7 @@ func (a *AppModel) View() string {
 	}
 
 	s += lipgloss.PlaceHorizontal(120, lipgloss.Center, styles.TitleStyle("GTop")) + styles.Cr
-	tabline := lipgloss.JoinHorizontal(lipgloss.Bottom, tabs...) + styles.Cr
+	tabline := lipgloss.JoinHorizontal(lipgloss.Bottom, tabs...)
 	s += lipgloss.JoinVertical(lipgloss.Left, tabline, a.tabs[a.currentTab].View())
 
 	return s

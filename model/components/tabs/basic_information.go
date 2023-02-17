@@ -49,20 +49,18 @@ func (b *BasicInformationModel) View() string {
 	stringedUptime = humanize.Time(time.Now().Add(-time.Second * time.Duration(uptime)))
 
 	distributionFullName := b.stats.DistribName + styles.SpaceSep + b.stats.DistribVersion
-	distrib := styles.LabelStyleRender("Distribution:") + distributionFullName + styles.TabSep + styles.LabelStyleRender("Kernel:") + styles.SpaceSep + b.stats.KernelVersion
+	distrib := styles.LabelStyleRender("Distribution:") + distributionFullName + styles.TabSep + styles.LabelStyleRender("Kernel:") + styles.SpaceSep + b.stats.KernelVersion + styles.Cr
 
 	userLine := styles.LabelStyleRender("Current User:") + styles.SpaceSep + b.stats.User.Uid + styles.SpaceSep + b.stats.User.Username + "@" + hostname + styles.TabSep + styles.LabelStyleRender("Groups:") + styles.SpaceSep + strings.Join(b.stats.User.Groups, ", ") + styles.Cr
 	systemLine := styles.LabelStyleRender("Uptime:") + styles.SpaceSep + stringedUptime + styles.TabSep + styles.LabelStyleRender("Network:") + styles.SpaceSep + strings.Join(netAddresses, ", ") + styles.Cr
 
 	ramTitleLine := styles.LabelStyleRender("RAM:") + styles.Cr
-	ramLine := "Free:" + styles.SpaceSep + humanize.Bytes(b.stats.GetAvailableRam()) + styles.TabSep + "Total:" + styles.SpaceSep + humanize.Bytes(b.stats.GetTotalRam())
-	ramBloc := lipgloss.JoinVertical(lipgloss.Left, ramTitleLine, ramLine)
+	ramLine := "Free:" + styles.SpaceSep + humanize.Bytes(b.stats.GetAvailableRam()) + styles.TabSep + "Total:" + styles.SpaceSep + humanize.Bytes(b.stats.GetTotalRam()) + styles.Cr
 
 	swapTitleLine := styles.LabelStyleRender("Swap:") + styles.Cr
-	swapLine := "Free:" + styles.SpaceSep + humanize.Bytes(b.stats.GetAvailableSwap()) + styles.TabSep + "Total:" + styles.SpaceSep + humanize.Bytes(b.stats.GetTotalSwap())
-	swapBloc := lipgloss.JoinVertical(lipgloss.Left, swapTitleLine, swapLine)
+	swapLine := "Free:" + styles.SpaceSep + humanize.Bytes(b.stats.GetAvailableSwap()) + styles.TabSep + "Total:" + styles.SpaceSep + humanize.Bytes(b.stats.GetTotalSwap()) + styles.Cr
 
-	textBlock := lipgloss.JoinVertical(lipgloss.Left, distrib, userLine, systemLine, ramBloc, swapBloc)
+	textBlock := lipgloss.JoinVertical(lipgloss.Left, distrib, userLine, systemLine, ramTitleLine, ramLine, swapTitleLine, swapLine)
 
 	return textBlock
 }
