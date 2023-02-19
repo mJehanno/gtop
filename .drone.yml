@@ -1,0 +1,15 @@
+kind: pipeline
+type: docker
+name: Analysis
+steps:
+- name: code-analysis
+  image: aosapps/drone-sonar-plugin
+  settings:
+    sonar_host:
+      from_secret: sonar_host
+    sonar_token:
+      from_secret: sonar_token
+- name: build
+  image: golang
+  commands:
+    - go build .
