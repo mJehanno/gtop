@@ -49,7 +49,7 @@ func (b *BasicInformationModel) View() string {
 	stringedUptime = humanize.Time(time.Now().Add(-time.Second * time.Duration(uptime)))
 
 	distributionFullName := b.stats.DistribName + styles.SpaceSep + b.stats.DistribVersion
-	distrib := styles.LabelStyleRender("Distribution:") + distributionFullName + styles.TabSep + styles.LabelStyleRender("Kernel:") + styles.SpaceSep + b.stats.KernelVersion + styles.Cr
+	distrib := styles.LabelStyleRender("Distribution:") + styles.SpaceSep + distributionFullName + styles.TabSep + styles.LabelStyleRender("Kernel:") + styles.SpaceSep + b.stats.KernelVersion + styles.Cr
 
 	userLine := styles.LabelStyleRender("Current User:") + styles.SpaceSep + b.stats.User.Uid + styles.SpaceSep + b.stats.User.Username + "@" + hostname + styles.TabSep + styles.LabelStyleRender("Groups:") + styles.SpaceSep + strings.Join(b.stats.User.Groups, ", ") + styles.Cr
 	systemLine := styles.LabelStyleRender("Uptime:") + styles.SpaceSep + stringedUptime + styles.TabSep + styles.LabelStyleRender("Network:") + styles.SpaceSep + strings.Join(netAddresses, ", ") + styles.Cr
