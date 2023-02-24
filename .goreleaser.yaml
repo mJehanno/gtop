@@ -37,10 +37,22 @@ aurs:
     description: "simpler alternative to htop, written in Go, made to display more useful data"
     private_key: /home/egmar/.ssh/aur
     git_url: 'ssh://aur@aur.archlinux.org/new-bin.git'
-    maintainers: 'mjehanno <mathob.jehanno@hotmail.fr'
     license: 'gpl-3.0'
-furies:
-  - account: mjehanno
+nfpms:
+  -
+    id: gtop
+    package_name: gtop
+    maintainer: mJehanno <mathob.jehanno@hotmail.fr>
+    description: |-
+      gtop is an alternative to top/htop made to provide more information in a better way.
+    license: GPL-3.0
+    formats:
+      - deb
+      - rpm
+#publishers:
+#  - name: fury.io
+#    cmd: 
+#    env:
 # modelines, feel free to remove those if you don't want/use them:
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj

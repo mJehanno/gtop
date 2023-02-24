@@ -14,3 +14,11 @@ steps:
   image: golang
   commands:
     - go build .
+- name: release
+  image: golang
+  commands:
+    - go install github.com/goreleaser/goreleaser@latest
+    - goreleaser release
+  when:
+    event:
+      - tag
