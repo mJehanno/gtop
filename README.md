@@ -13,3 +13,23 @@ It currently only support Linux.
 
 
 ## Installation
+
+### AUR
+
+```bash
+git clone https://aur.archlinux.org/gtop.git
+cd gtop
+makepkg -si
+```
+
+### Go
+
+`go install github.com/mJehanno/gtop@latest`
+
+### Tarball
+
+Download one of the release archive, then extract it (`tar -xzf [filename].tar.gz`), 
+then add the path to the new folder in your $PATH environment variable (you probably in your `~/.bashrc`, `~/.zshrc` or `~/.profile`)
+
+
+
