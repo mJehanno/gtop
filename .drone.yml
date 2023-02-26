@@ -16,6 +16,9 @@ steps:
     - go build .
 - name: release
   image: golang
+  environment:
+    GITHUB_TOKEN:
+      from_secret: github_token
   commands:
     - go install github.com/goreleaser/goreleaser@latest
     - goreleaser release
