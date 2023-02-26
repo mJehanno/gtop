@@ -2,6 +2,10 @@ kind: pipeline
 type: docker
 name: Analysis
 steps:
+- name: fetch
+  image: docker:git
+  commands:
+    - git fetch --tags
 - name: code-analysis
   image: aosapps/drone-sonar-plugin
   settings:
@@ -15,12 +19,11 @@ steps:
   commands:
     - go build .
 - name: release
-  image: golang
+  image: goreleaser/goreleaser
   environment:
     GITHUB_TOKEN:
       from_secret: github_token
   commands:
-    - go install github.com/goreleaser/goreleaser@latest
     - goreleaser release
   when:
     event:
