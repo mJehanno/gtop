@@ -37,6 +37,8 @@ aurs:
     private_key: '{{ .Env.AUR_KEY }}' 
     git_url: 'ssh://aur@aur.archlinux.org/gtop.git'
     license: 'gpl-3.0'
+    git_ssh_command: 'ssh -i {{ .Env.AUR_KEY }} -o StrictHostKeyChecking=accept-new'
+
 nfpms:
   -
     id: gtop
