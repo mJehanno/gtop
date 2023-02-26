@@ -21,6 +21,8 @@ steps:
 - name: release
   image: goreleaser/goreleaser
   environment:
+    AUR_KEY:
+      from_secret: aur_key
     GITHUB_TOKEN:
       from_secret: github_token
   commands:

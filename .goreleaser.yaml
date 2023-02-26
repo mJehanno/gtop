@@ -34,7 +34,7 @@ aurs:
   -
     name: gtop
     description: "simpler alternative to htop, written in Go, made to display more useful data"
-    private_key: /home/egmar/.ssh/aur
+    private_key: '{{ .Env.AUR_KEY }}' 
     git_url: 'ssh://aur@aur.archlinux.org/new-bin.git'
     license: 'gpl-3.0'
 nfpms:
