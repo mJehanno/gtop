@@ -1,10 +1,6 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
-    # you may remove this if you don't need go generate
 builds:
   - env:
       - CGO_ENABLED=0
@@ -34,11 +30,9 @@ aurs:
   -
     name: gtop
     description: "simpler alternative to htop, written in Go, made to display more useful data"
-    private_key: '{{ .Env.AUR_KEY }}' 
-    git_url: 'ssh://aur@aur.archlinux.org/gtop.git'
+    git_url: 'ssh://aur@aur.archlinux.org/gtop-bin.git'
+    private_key: '/home/egmar/.ssh/aur'
     license: 'gpl-3.0'
-    git_ssh_command: 'ssh -i {{ .Env.AUR_KEY }} -o StrictHostKeyChecking=accept-new'
-
 nfpms:
   -
     id: gtop

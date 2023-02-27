@@ -26,6 +26,7 @@ steps:
     GITHUB_TOKEN:
       from_secret: github_token
   commands:
+    - echo $AUR_KEY > ../ssh-key
     - goreleaser release
   when:
     event:
