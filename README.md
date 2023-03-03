@@ -1,5 +1,9 @@
 # GTop
 
+[![Build Status](https://drone.mathob-jehanno.com/api/badges/mJehanno/gtop/status.svg?ref=refs/heads/main)](https://drone.mathob-jehanno.com/mJehanno/gtop)
+[![Quality Gate Status](https://sonar.mathob-jehanno.com/api/project_badges/measure?project=gtop&metric=alert_status&token=sqb_154f71e0a2775ce29014405cd5d4d8bf8499adab)](https://sonar.mathob-jehanno.com/dashboard?id=gtop)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mjehanno/gtop)](https://goreportcard.com/report/github.com/mjehanno/gtop)
+
 ## Introduction
 
 GTop is an alternative to `top` or `htop` made in Go.
