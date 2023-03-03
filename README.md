@@ -24,7 +24,7 @@ makepkg -si
 
 ### Go
 
-`go install github.com/mJehanno/gtop@latest`
+`go install github.com/mjehanno/gtop@latest`
 
 ### Tarball
 
