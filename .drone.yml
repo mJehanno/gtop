@@ -1,12 +1,15 @@
 kind: pipeline
 type: docker
-name: Analysis
+name: gtop
 steps:
 - name: fetch
   image: docker:git
   commands:
     - git fetch --tags
-- name: code-analysis
+  when:
+    event:
+      - tag
+- name: sonar analysis
   image: aosapps/drone-sonar-plugin
   settings:
     sonar_host:
@@ -28,6 +31,30 @@ steps:
   commands:
     - echo $AUR_KEY > ../ssh-key
     - goreleaser release
+  when:
+    event:
+      - tag
+
+---
+kind: pipeline
+type: docker
+name: vhs
+
+steps:
+- name: gif-generation
+  image: mjehanno/vhs:latest
+  environment:
+    KEY:
+      from_secret: vhs_commit
+  commands:
+    - echo $KEY > ~/.ssh/vhs_key
+    - echo 'Host github.com-gtop' >> ~/.ssh/config
+    - echo '      Hostname github.com' >> ~/.ssh/config
+    - echo '      IdentityFile=/home/vhs/.ssh/vhs_key' >> ~/.ssh/config
+    - vhs demo.tape
+    - git add demo.gif
+    - git commit -m 'feat(vhs): adds generated demo.gif'
+    - git push origin main
   when:
     event:
       - tag

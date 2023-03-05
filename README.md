@@ -36,4 +36,7 @@ Download one of the release archive, then extract it (`tar -xzf [filename].tar.g
 then add the path to the new folder in your $PATH environment variable (you probably in your `~/.bashrc`, `~/.zshrc` or `~/.profile`)
 
 
+## Usage
 
+
+![demo gif](demo.gif)
