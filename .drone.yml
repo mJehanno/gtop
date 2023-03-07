@@ -47,7 +47,6 @@ steps:
     KEY:
       from_secret: vhs_commit
   commands:
-  - go install github.com/charmbracelet/vhs@latest
   - mkdir -p ~/.ssh
   - echo $KEY > ~/.ssh/vhs_key
   - echo 'Host github.com-gtop' >> ~/.ssh/config
@@ -57,6 +56,3 @@ steps:
   - git add demo.gif
   - "git commit -m 'feat(vhs): adds generated demo.gif"
   - git push origin main
-  when:
-    event:
-    - tag

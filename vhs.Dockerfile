@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add go firefox ffmpeg ttyd bash chromium sudo git
+RUN apk add go firefox ffmpeg ttyd bash chromium sudo git vhs
 RUN    	echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel; \
         adduser -D vhs -G wheel; 
 
