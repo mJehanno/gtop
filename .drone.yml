@@ -11,13 +11,13 @@ steps:
     event:
     - tag
 - name: sonar analysis
-  image: aosapps/drone-sonar-plugin
+  image: kytay/sonar-node-plugin 
   settings:
     sonar_host:
       from_secret: sonar_host
     sonar_token:
       from_secret: sonar_token
-    usingProperties: true
+    sonar_project_settings: ./sonar-project.properties
 - name: build
   image: golang
   commands:
@@ -35,24 +35,56 @@ steps:
     event:
     - tag
 
----
-kind: pipeline
-type: docker
-name: vhs
-
-steps:
-- name: gif-generation
-  image: mjehanno/vhs
-  environment:
-    KEY:
-      from_secret: vhs_commit
-  commands:
-  - mkdir -p ~/.ssh
-  - echo $KEY > ~/.ssh/vhs_key
-  - echo 'Host github.com-gtop' >> ~/.ssh/config
-  - echo '      Hostname github.com' >> ~/.ssh/config
-  - echo '      IdentityFile=/home/vhs/.ssh/vhs_key' >> ~/.ssh/config
-  - vhs demo.tape
-  - git add demo.gif
-  - "git commit -m 'feat(vhs): adds generated demo.gif"
-  - git push origin main
+      #---
+      #kind: pipeline
+      #type: docker
+      #name: docker-build
+      #
+      #steps:
+      #- name: build-tag
+      #  image: plugins/docker
+      #  failure: ignore
+      #  settings:
+      #    username: mjehanno
+      #    password:
+      #      from_secret: docker_token
+      #    tags:
+      #    - latest
+      #    - ${DRONE_TAG}
+      #    repo: mjehanno/vhs
+      #    dockerfile: vhs.Dockerfile
+      #    force_tag: true
+      #    squash: true
+      #  when:
+      #    event:
+      #    - tag
+      #
+      #---
+      #kind: pipeline
+      #type: docker
+      #name: vhs
+      #
+      #steps:
+      #- name: gif-generation
+      #  image: mjehanno/vhs:latest
+      #  failure: ignore
+      #  privileged: true
+      #  commands:
+      #  - vhs demo.tape
+      #  - git config --global user.name="mJehanno"
+      #  - git config --global user.email="mathob.jehanno@hotmail.fr"
+      #  - git add .
+      #  - "git commit -m 'feat(vhs): update demo.gif for documentation on usage'"
+      #  - echo $SSH_KEY >> /home/vhs/.ssh/git
+      #  - echo "Host github.com" >> /home/vhs/.ssh/config
+      #  - echo "  User git"
+      #  - echo "  IdentityFile /home/vhs/.ssh/git"
+      #  - git push origin main
+      #  environment:
+      #    SSH_KEY:
+      #      from_secret: vhs_commit
+      #  when:
+      #    event:
+      #      - tag
+      #depends_on:
+      #- docker-build
